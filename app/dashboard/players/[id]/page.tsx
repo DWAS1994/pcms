@@ -1,59 +1,25 @@
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
+// app/dashboard/players/[id]/page.tsx
 
-export default async function PlayersPage() {
-  const players = await prisma.player.findMany({
-    orderBy: { updatedAt: "desc" }
-  });
+type Params = Promise<{ id: string }>;
+
+export default async function PlayerPage(props: { params: Params }) {
+  // We must 'await' the params in Next.js 15
+  const params = await props.params;
+  const id = params.id;
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Players</h1>
-          <p className="text-slate-400">Manage and review player accounts.</p>
+    <div className="p-8 bg-gray-900 min-h-screen text-white">
+      <h1 className="text-2xl font-bold mb-4">Player Details</h1>
+      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+        <p className="text-gray-400">Viewing details for Player ID:</p>
+        <code className="text-blue-400 text-xl font-mono">{id}</code>
+        
+        {/* Your player management logic (Ban, Edit, etc.) goes here */}
+        <div className="mt-8">
+            <button className="bg-red-600 px-4 py-2 rounded text-sm">
+                Issue HWID Ban for this ID
+            </button>
         </div>
-        <Link href="/dashboard/players/new" className="btn btn-primary">
-          New Player
-        </Link>
-      </div>
-
-      <div className="panel overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Account</th>
-              <th>Character</th>
-              <th>Level</th>
-              <th>Gold</th>
-              <th>IP</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((p) => (
-              <tr key={p.id}>
-                <td>{p.accountName}</td>
-                <td>{p.characterName}</td>
-                <td>{p.level}</td>
-                <td>{p.gold.toString()}</td>
-                <td>{p.ipAddress || "-"}</td>
-                <td><span className="badge">{p.status}</span></td>
-                <td>
-                  <Link className="text-blue-300" href={"/dashboard/players/" + p.id}>
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {players.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-slate-400">No players found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
       </div>
     </div>
   );
