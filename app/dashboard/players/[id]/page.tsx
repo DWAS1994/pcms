@@ -1,20 +1,10 @@
-import { notFound } from "next/navigation";
+// app/dashboard/players/[id]/page.tsx
 
-type PlayerPageProps = {
-  params: Promise<{
-    id: string;
-  }>;
-  searchParams?: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
-};
+type Params = Promise<{ id: string }>;
 
-export default async function PlayerPage({ params }: PlayerPageProps) {
-  const { id } = await params;
-
-  if (!id) {
-    notFound();
-  }
+export default async function PlayerPage(props: { params: Params }) {
+  const params = await props.params;
+  const id = params.id;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-10">
