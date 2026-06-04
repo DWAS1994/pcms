@@ -1,111 +1,60 @@
-"use client";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-import { use } from "react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-export default function EditPlayerPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const router = useRouter();
-  const { id } = use(params);
-
-  const [form, setForm] = useState<any>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/players/" + id)
-      .then((r) => r.json())
-      .then((data) => setForm(data.player));
-  }, [id]);
-
-  function setField(key: string, value: any) {
-    setForm((f: any) => ({ ...f, [key]: value }));
-  }
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-
-    const res = await fetch("/api/players/" + id, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      setError(data.error || "Could not save player");
-      return;
-    }
-
-    router.push("/dashboard/players");
-  }
-
-  async function remove() {
-    if (!confirm("Delete this player?")) return;
-
-    await fetch("/api/players/" + id, { method: "DELETE" });
-    router.push("/dashboard/players");
-  }
-
-  if (!form) return <div className="panel p-5">Loading...</div>;
+export default async function PlayersPage() {
+  const players = await prisma.player.findMany({
+    orderBy: { updatedAt: "desc" }
+  });
 
   return (
-    <form onSubmit={save} className="panel p-5 space-y-4 max-w-2xl">
-      <h1 className="text-3xl font-bold">Edit Player</h1>
-      {error && <div className="text-red-300">{error}</div>}
-
-      <input
-        className="input"
-        value={form.accountName}
-        onChange={(e) => setField("accountName", e.target.value)}
-      />
-      <input
-        className="input"
-        value={form.characterName}
-        onChange={(e) => setField("characterName", e.target.value)}
-      />
-      <input
-        className="input"
-        type="number"
-        value={form.level}
-        onChange={(e) => setField("level", Number(e.target.value))}
-      />
-      <input
-        className="input"
-        value={String(form.gold)}
-        onChange={(e) => setField("gold", e.target.value)}
-      />
-      <input
-        className="input"
-        value={form.ipAddress || ""}
-        onChange={(e) => setField("ipAddress", e.target.value)}
-      />
-      <select
-        className="input"
-        value={form.status}
-        onChange={(e) => setField("status", e.target.value)}
-      >
-        <option value="active">active</option>
-        <option value="flagged">flagged</option>
-        <option value="banned">banned</option>
-      </select>
-      <textarea
-        className="input"
-        value={form.notes || ""}
-        onChange={(e) => setField("notes", e.target.value)}
-      />
-
-      <div className="flex gap-3">
-        <button className="btn btn-primary">Save</button>
-        <button type="button" onClick={remove} className="btn btn-secondary">
-          Delete
-        </button>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold">Players</h1>
+          <p className="text-slate-400">Manage and review player accounts.</p>
+        </div>
+        <Link href="/dashboard/players/new" className="btn btn-primary">
+          New Player
+        </Link>
       </div>
-    </form>
+
+      <div className="panel overflow-x-auto">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Character</th>
+              <th>Level</th>
+              <th>Gold</th>
+              <th>IP</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.map((p) => (
+              <tr key={p.id}>
+                <td>{p.accountName}</td>
+                <td>{p.characterName}</td>
+                <td>{p.level}</td>
+                <td>{p.gold.toString()}</td>
+                <td>{p.ipAddress || "-"}</td>
+                <td><span className="badge">{p.status}</span></td>
+                <td>
+                  <Link className="text-blue-300" href={"/dashboard/players/" + p.id}>
+                    Edit
+                  </Link>
+                </td>
+              </tr>
+            ))}
+            {players.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-slate-400">No players found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
