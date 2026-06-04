@@ -1,26 +1,31 @@
-// app/dashboard/players/[id]/page.tsx
+import { notFound } from "next/navigation";
 
-type Params = Promise<{ id: string }>;
+type PlayerPageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+  searchParams?: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
+};
 
-export default async function PlayerPage(props: { params: Params }) {
-  // We must 'await' the params in Next.js 15
-  const params = await props.params;
-  const id = params.id;
+export default async function PlayerPage({ params }: PlayerPageProps) {
+  const { id } = await params;
+
+  if (!id) {
+    notFound();
+  }
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-4">Player Details</h1>
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-        <p className="text-gray-400">Viewing details for Player ID:</p>
-        <code className="text-blue-400 text-xl font-mono">{id}</code>
-        
-        {/* Your player management logic (Ban, Edit, etc.) goes here */}
-        <div className="mt-8">
-            <button className="bg-red-600 px-4 py-2 rounded text-sm">
-                Issue HWID Ban for this ID
-            </button>
-        </div>
+    <main className="min-h-screen bg-slate-950 text-slate-100 p-10">
+      <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+        Player Details
+      </h1>
+
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl">
+        <p className="text-sm text-slate-400">Player ID</p>
+        <p className="text-xl font-mono text-emerald-400">{id}</p>
       </div>
-    </div>
+    </main>
   );
 }
