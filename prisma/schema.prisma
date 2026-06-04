@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("owner")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Player {
+  id            Int       @id @default(autoincrement())
+  accountName   String    @unique
+  characterName String
+  level         Int       @default(1)
+  gold          BigInt    @default(0)
+  ipAddress     String?
+  status        String    @default("active")
+  notes         String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model License {
+  id          Int       @id @default(autoincrement())
+  productId   String
+  licenseKey  String    @unique
+  ownerEmail  String?
+  status      String    @default("inactive")
+  activatedAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orderId     String?   @unique
+  payerId     String?
+  notes       String?
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actor     String
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
