@@ -1,60 +1,21 @@
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
+// app/dashboard/players/[id]/page.tsx
 
-export default async function PlayersPage() {
-  const players = await prisma.player.findMany({
-    orderBy: { updatedAt: "desc" }
-  });
+type Params = Promise<{ id: string }>;
+
+export default async function PlayerPage(props: { params: Params }) {
+  const params = await props.params;
+  const id = params.id;
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Players</h1>
-          <p className="text-slate-400">Manage and review player accounts.</p>
-        </div>
-        <Link href="/dashboard/players/new" className="btn btn-primary">
-          New Player
-        </Link>
-      </div>
+    <main className="min-h-screen bg-slate-950 text-slate-100 p-10">
+      <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+        Player Details
+      </h1>
 
-      <div className="panel overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Account</th>
-              <th>Character</th>
-              <th>Level</th>
-              <th>Gold</th>
-              <th>IP</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((p) => (
-              <tr key={p.id}>
-                <td>{p.accountName}</td>
-                <td>{p.characterName}</td>
-                <td>{p.level}</td>
-                <td>{p.gold.toString()}</td>
-                <td>{p.ipAddress || "-"}</td>
-                <td><span className="badge">{p.status}</span></td>
-                <td>
-                  <Link className="text-blue-300" href={"/dashboard/players/" + p.id}>
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {players.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-slate-400">No players found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl">
+        <p className="text-sm text-slate-400">Player ID</p>
+        <p className="text-xl font-mono text-emerald-400">{id}</p>
       </div>
-    </div>
+    </main>
   );
 }
